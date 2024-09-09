@@ -1,0 +1,127 @@
+#include <iostream>
+#include <cstdlib>  // For rand() and srand()
+#include <ctime>    // For time()
+#include <limits>   // For numeric limits
+using namespace std;
+
+// Function to generate a random number within the given range
+int generateRandomNumber(int low, int high) {
+    return rand() % (high - low + 1) + low;
+}
+
+// Function to display leaderboard
+void displayLeaderboard(int highScore) {
+    cout << "\n=== Leaderboard ===\n";
+    cout << "High Score: " << highScore << "\n";
+    cout << "===================\n";
+}
+
+// Function to play the guessing game with hints and scoring system
+int playGame(int low, int high, int maxAttempts) {
+    int number = generateRandomNumber(low, high);
+    int guess;
+    int attempts = 0;
+    int score = 100;  // Starting score
+
+    cout << "I have selected a number between " << low << " and " << high << ". You have " << maxAttempts << " attempts to guess it!\n";
+
+    while (attempts < maxAttempts) {
+        cout << "Enter your guess: ";
+        cin >> guess;
+
+        if (cin.fail()) { // Check for invalid input
+            cin.clear(); // Clear error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore invalid input
+            cout << "Invalid input! Please enter a number.\n";
+            continue;
+        }
+
+        attempts++;
+
+        if (guess > number) {
+            cout << "Too high! ";
+        } else if (guess < number) {
+            cout << "Too low! ";
+        } else {
+            cout << "Congratulations! You guessed the number " << number << " in " << attempts << " attempts.\n";
+            score -= (attempts - 1) * 10;  // Reduce score based on attempts
+            return score;
+        }
+
+        // Provide a hint
+        if (attempts % 3 == 0) {
+            if (abs(guess - number) > 10) {
+                cout << "Hint: You're far off!\n";
+            } else {
+                cout << "Hint: You're getting closer!\n";
+            }
+        } else {
+            cout << "Try again.\n";
+        }
+    }
+
+    // If max attempts reached without guessing correctly
+    cout << "Sorry! You've used all " << maxAttempts << " attempts. The correct number was " << number << ".\n";
+    return 0;
+}
+
+// Function to select difficulty level
+void selectDifficulty(int &low, int &high, int &maxAttempts) {
+    int choice;
+    cout << "Select Difficulty Level:\n";
+    cout << "1. Easy (1-50, 10 attempts)\n";
+    cout << "2. Medium (1-100, 7 attempts)\n";
+    cout << "3. Hard (1-200, 5 attempts)\n";
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            low = 1;
+            high = 50;
+            maxAttempts = 10;
+            break;
+        case 2:
+            low = 1;
+            high = 100;
+            maxAttempts = 7;
+            break;
+        case 3:
+            low = 1;
+            high = 200;
+            maxAttempts = 5;
+            break;
+        default:
+            cout << "Invalid choice! Defaulting to Easy level.\n";
+            low = 1;
+            high = 50;
+            maxAttempts = 10;
+            break;
+    }
+}
+
+int main() {
+    srand(static_cast<unsigned int>(time(0)));  // Seed random number generator
+    int low, high, maxAttempts;
+    int highScore = 0;  // Track high score
+    char playAgain;
+
+    cout << "=== Welcome to the Number Guessing Game! ===\n";
+
+    do {
+        selectDifficulty(low, high, maxAttempts);  // Select difficulty
+        int score = playGame(low, high, maxAttempts);  // Play the game
+
+        if (score > highScore) {
+            highScore = score;  // Update high score if beaten
+        }
+
+        displayLeaderboard(highScore);  // Show leaderboard
+
+        cout << "Do you want to play again? (y/n): ";
+        cin >> playAgain;
+    } while (playAgain == 'y' || playAgain == 'Y');
+
+    cout << "Thank you for playing! Your highest score was: " << highScore << "\n";
+    return 0;
+}
